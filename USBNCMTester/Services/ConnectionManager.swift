@@ -36,6 +36,7 @@ final class ConnectionManager: ObservableObject {
     @Published private(set) var requestCount: Int = 0
     @Published private(set) var lastResponseTime: Date?
     @Published private(set) var lastResponseSize: Int = 0
+    @Published var soundEnabled: Bool = true
 
     private var connection: NWConnection?
     private var keepAliveTimer: Timer?
@@ -197,7 +198,9 @@ final class ConnectionManager: ObservableObject {
                     self?.lastResponseTime = Date()
                     self?.lastResponseSize = data.count
                     self?.log("Response #\(requestNumber): \(data.count) bytes")
-                    AudioServicesPlaySystemSound(1057)
+                    if self?.soundEnabled == true {
+                        AudioServicesPlaySystemSound(1057)
+                    }
                 }
 
                 if isComplete {

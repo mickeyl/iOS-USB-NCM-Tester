@@ -8,7 +8,8 @@ struct ContentView: View {
     @StateObject private var locationManager = LocationManager()
     @StateObject private var activityManager = ActivityManager()
 
-    @State private var autoConnectEnabled = true
+    @AppStorage("autoConnectEnabled") private var autoConnectEnabled = true
+    @AppStorage("soundEnabled") private var soundEnabled = true
     @State private var showingSettings = false
 
     var body: some View {
@@ -41,12 +42,13 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsSheet(autoConnectEnabled: $autoConnectEnabled)
+                SettingsSheet(autoConnectEnabled: $autoConnectEnabled, soundEnabled: $soundEnabled)
                     .presentationDetents([.medium])
             }
             .onAppear {
                 scanner.startScanning()
                 locationManager.requestAuthorization()
+                connectionManager.soundEnabled = soundEnabled
             }
             .onDisappear {
                 scanner.stopScanning()
@@ -64,6 +66,9 @@ struct ContentView: View {
             }
             .onChange(of: connectionManager.requestCount) { _, _ in
                 updateLiveActivity()
+            }
+            .onChange(of: soundEnabled) { _, newValue in
+                connectionManager.soundEnabled = newValue
             }
         }
     }
@@ -116,6 +121,7 @@ struct ContentView: View {
 
 struct SettingsSheet: View {
     @Binding var autoConnectEnabled: Bool
+    @Binding var soundEnabled: Bool
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -127,6 +133,14 @@ struct SettingsSheet: View {
                     }
                 } footer: {
                     Text("Automatically connect to www.google.de when an Ethernet interface is detected.")
+                }
+
+                Section {
+                    Toggle(isOn: $soundEnabled) {
+                        Label("Response Sound", systemImage: "speaker.wave.2")
+                    }
+                } footer: {
+                    Text("Play a sound for each successful response.")
                 }
             }
             .navigationTitle("Settings")
