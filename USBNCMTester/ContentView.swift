@@ -1,9 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.scenePhase) private var scenePhase
+
     @StateObject private var scanner = NetworkInterfaceScanner()
     @StateObject private var connectionManager = ConnectionManager()
     @StateObject private var locationManager = LocationManager()
+    @StateObject private var activityManager = ActivityManager()
+
     @State private var autoConnectEnabled = true
     @State private var showingSettings = false
 
@@ -47,10 +51,39 @@ struct ContentView: View {
             .onDisappear {
                 scanner.stopScanning()
                 connectionManager.disconnect()
+                activityManager.endActivity()
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                handleScenePhaseChange(newPhase)
             }
             .onChange(of: scanner.ethernetInterface) { _, newInterface in
                 handleEthernetInterfaceChange(newInterface)
             }
+            .onChange(of: connectionManager.state) { _, _ in
+                updateLiveActivity()
+            }
+            .onChange(of: connectionManager.requestCount) { _, _ in
+                updateLiveActivity()
+            }
+        }
+    }
+
+    private func handleScenePhaseChange(_ phase: ScenePhase) {
+        switch phase {
+            case .background:
+                print("DEBUG: [APP] Entering background")
+                activityManager.startActivity(interfaceName: scanner.ethernetInterface?.name)
+                updateLiveActivity()
+
+            case .active:
+                print("DEBUG: [APP] Becoming active")
+                activityManager.endActivity()
+
+            case .inactive:
+                print("DEBUG: [APP] Becoming inactive")
+
+            @unknown default:
+                break
         }
     }
 
@@ -62,6 +95,22 @@ struct ContentView: View {
                 connectionManager.connect(usingInterface: interface.name)
             }
         }
+    }
+
+    private func updateLiveActivity() {
+        let isConnected: Bool
+        if case .connected = connectionManager.state {
+            isConnected = true
+        } else {
+            isConnected = false
+        }
+
+        activityManager.updateActivity(
+            isConnected: isConnected,
+            requestCount: connectionManager.requestCount,
+            lastResponseTime: connectionManager.lastResponseTime,
+            interfaceName: scanner.ethernetInterface?.name
+        )
     }
 }
 

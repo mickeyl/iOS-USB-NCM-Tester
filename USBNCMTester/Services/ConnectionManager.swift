@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import Network
+import AudioToolbox
 
 final class ConnectionManager: ObservableObject {
     enum ConnectionState: Equatable {
@@ -196,6 +197,7 @@ final class ConnectionManager: ObservableObject {
                     self?.lastResponseTime = Date()
                     self?.lastResponseSize = data.count
                     self?.log("Response #\(requestNumber): \(data.count) bytes")
+                    AudioServicesPlaySystemSound(1057)
                 }
 
                 if isComplete {

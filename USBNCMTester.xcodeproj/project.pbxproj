@@ -16,7 +16,39 @@
 		A10000010000000000000007 /* InterfaceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000007 /* InterfaceListView.swift */; };
 		A10000010000000000000008 /* ConnectionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000008 /* ConnectionStatusView.swift */; };
 		A10000010000000000000011 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000011 /* LocationManager.swift */; };
+		A10000010000000000000012 /* ConnectionActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000012 /* ConnectionActivityAttributes.swift */; };
+		A10000010000000000000013 /* ActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000013 /* ActivityManager.swift */; };
+		A20000010000000000000001 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000020000000000000001 /* WidgetKit.framework */; };
+		A20000010000000000000002 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000020000000000000002 /* SwiftUI.framework */; };
+		A20000010000000000000003 /* USBNCMTesterWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000003 /* USBNCMTesterWidgetBundle.swift */; };
+		A20000010000000000000004 /* ConnectionLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000004 /* ConnectionLiveActivity.swift */; };
+		A20000010000000000000005 /* ConnectionActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000012 /* ConnectionActivityAttributes.swift */; };
+		A20000010000000000000006 /* USBNCMTesterWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A20000030000000000000001 /* USBNCMTesterWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A20000040000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000090000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A20000060000000000000001;
+			remoteInfo = USBNCMTesterWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A20000050000000000000001 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A20000010000000000000006 /* USBNCMTesterWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		70F944412F0BF8D5009A7C30 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -29,7 +61,14 @@
 		A10000020000000000000007 /* InterfaceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InterfaceListView.swift; sourceTree = "<group>"; };
 		A10000020000000000000008 /* ConnectionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionStatusView.swift; sourceTree = "<group>"; };
 		A10000020000000000000011 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		A10000020000000000000012 /* ConnectionActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionActivityAttributes.swift; sourceTree = "<group>"; };
+		A10000020000000000000013 /* ActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityManager.swift; sourceTree = "<group>"; };
 		A10000030000000000000001 /* USBNCMTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = USBNCMTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000020000000000000001 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		A20000020000000000000002 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		A20000020000000000000003 /* USBNCMTesterWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBNCMTesterWidgetBundle.swift; sourceTree = "<group>"; };
+		A20000020000000000000004 /* ConnectionLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionLiveActivity.swift; sourceTree = "<group>"; };
+		A20000030000000000000001 /* USBNCMTesterWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = USBNCMTesterWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,6 +79,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A20000040000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20000010000000000000002 /* SwiftUI.framework in Frameworks */,
+				A20000010000000000000001 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -47,7 +95,9 @@
 			isa = PBXGroup;
 			children = (
 				A10000050000000000000002 /* USBNCMTester */,
+				A20000050000000000000002 /* USBNCMTesterWidget */,
 				A10000050000000000000003 /* Products */,
+				A20000050000000000000003 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,6 +107,7 @@
 				70F944412F0BF8D5009A7C30 /* Info.plist */,
 				A10000020000000000000001 /* USBNCMTesterApp.swift */,
 				A10000020000000000000002 /* ContentView.swift */,
+				A10000020000000000000012 /* ConnectionActivityAttributes.swift */,
 				A10000050000000000000004 /* Models */,
 				A10000050000000000000005 /* Views */,
 				A10000050000000000000006 /* Services */,
@@ -69,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000030000000000000001 /* USBNCMTester.app */,
+				A20000030000000000000001 /* USBNCMTesterWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,8 +148,27 @@
 				A10000020000000000000004 /* NetworkInterfaceScanner.swift */,
 				A10000020000000000000006 /* ConnectionManager.swift */,
 				A10000020000000000000011 /* LocationManager.swift */,
+				A10000020000000000000013 /* ActivityManager.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		A20000050000000000000002 /* USBNCMTesterWidget */ = {
+			isa = PBXGroup;
+			children = (
+				A20000020000000000000003 /* USBNCMTesterWidgetBundle.swift */,
+				A20000020000000000000004 /* ConnectionLiveActivity.swift */,
+			);
+			path = USBNCMTesterWidget;
+			sourceTree = "<group>";
+		};
+		A20000050000000000000003 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A20000020000000000000001 /* WidgetKit.framework */,
+				A20000020000000000000002 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -110,15 +181,34 @@
 				A10000070000000000000001 /* Sources */,
 				A10000040000000000000001 /* Frameworks */,
 				A10000070000000000000002 /* Resources */,
+				A20000050000000000000001 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A20000060000000000000002 /* PBXTargetDependency */,
 			);
 			name = USBNCMTester;
 			productName = USBNCMTester;
 			productReference = A10000030000000000000001 /* USBNCMTester.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A20000060000000000000001 /* USBNCMTesterWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A20000080000000000000001 /* Build configuration list for PBXNativeTarget "USBNCMTesterWidgetExtension" */;
+			buildPhases = (
+				A20000070000000000000001 /* Sources */,
+				A20000040000000000000002 /* Frameworks */,
+				A20000070000000000000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = USBNCMTesterWidgetExtension;
+			productName = USBNCMTesterWidgetExtension;
+			productReference = A20000030000000000000001 /* USBNCMTesterWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -131,6 +221,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					A10000060000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					A20000060000000000000001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -149,6 +242,7 @@
 			projectRoot = "";
 			targets = (
 				A10000060000000000000001 /* USBNCMTester */,
+				A20000060000000000000001 /* USBNCMTesterWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -159,6 +253,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000010000000000000003 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A20000070000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,10 +278,30 @@
 				A10000010000000000000007 /* InterfaceListView.swift in Sources */,
 				A10000010000000000000008 /* ConnectionStatusView.swift in Sources */,
 				A10000010000000000000011 /* LocationManager.swift in Sources */,
+				A10000010000000000000012 /* ConnectionActivityAttributes.swift in Sources */,
+				A10000010000000000000013 /* ActivityManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A20000070000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20000010000000000000003 /* USBNCMTesterWidgetBundle.swift in Sources */,
+				A20000010000000000000004 /* ConnectionLiveActivity.swift in Sources */,
+				A20000010000000000000005 /* ConnectionActivityAttributes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A20000060000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A20000060000000000000001 /* USBNCMTesterWidgetExtension */;
+			targetProxy = A20000040000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A100000A0000000000000001 /* Debug */ = {
@@ -305,6 +426,7 @@
 		A100000A0000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -334,6 +456,7 @@
 		A100000A0000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -360,6 +483,56 @@
 			};
 			name = Release;
 		};
+		A200000A0000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NANNL9SK66;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = USBNCMTesterWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = USBNCMTesterWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.USBNCMTester.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A200000A0000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NANNL9SK66;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = USBNCMTesterWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = USBNCMTesterWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.example.USBNCMTester.Widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -377,6 +550,15 @@
 			buildConfigurations = (
 				A100000A0000000000000001 /* Debug */,
 				A100000A0000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A20000080000000000000001 /* Build configuration list for PBXNativeTarget "USBNCMTesterWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A200000A0000000000000001 /* Debug */,
+				A200000A0000000000000002 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

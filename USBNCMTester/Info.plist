@@ -10,5 +10,7 @@
 	<string>Location access is used to keep the app running in the background for USB-NCM testing.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Location access is used to keep the app running in the background for USB-NCM testing.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 </dict>
 </plist>
