@@ -1,0 +1,225 @@
+import Foundation
+import Combine
+import Network
+
+final class ConnectionManager: ObservableObject {
+    enum ConnectionState: Equatable {
+        case disconnected
+        case connecting
+        case connected
+        case failed(String)
+
+        var description: String {
+            switch self {
+                case .disconnected:
+                    return "Disconnected"
+                case .connecting:
+                    return "Connecting…"
+                case .connected:
+                    return "Connected"
+                case .failed(let error):
+                    return "Failed: \(error)"
+            }
+        }
+    }
+
+    struct ConnectionLog: Identifiable {
+        let id = UUID()
+        let timestamp: Date
+        let message: String
+        let isError: Bool
+    }
+
+    @Published private(set) var state: ConnectionState = .disconnected
+    @Published private(set) var logs: [ConnectionLog] = []
+    @Published private(set) var requestCount: Int = 0
+    @Published private(set) var lastResponseTime: Date?
+    @Published private(set) var lastResponseSize: Int = 0
+
+    private var connection: NWConnection?
+    private var keepAliveTimer: Timer?
+    private let targetHost: String
+    private let targetPort: UInt16
+    private let keepAliveInterval: TimeInterval
+
+    init(
+        targetHost: String = "www.google.de",
+        targetPort: UInt16 = 80,
+        keepAliveInterval: TimeInterval = 5.0
+    ) {
+        self.targetHost = targetHost
+        self.targetPort = targetPort
+        self.keepAliveInterval = keepAliveInterval
+    }
+
+    func connect(usingInterface interfaceName: String? = nil) {
+        disconnect()
+
+        state = .connecting
+        log("Initiating connection to \(targetHost):\(targetPort)")
+
+        let host = NWEndpoint.Host(targetHost)
+        let port = NWEndpoint.Port(rawValue: targetPort)!
+
+        let parameters = NWParameters.tcp
+        parameters.prohibitExpensivePaths = false
+        parameters.prohibitedInterfaceTypes = []
+
+        if let interfaceName = interfaceName {
+            log("Requiring interface: \(interfaceName)")
+            parameters.requiredInterfaceType = .wiredEthernet
+        }
+
+        connection = NWConnection(host: host, port: port, using: parameters)
+
+        connection?.stateUpdateHandler = { [weak self] newState in
+            DispatchQueue.main.async {
+                self?.handleConnectionStateChange(newState)
+            }
+        }
+
+        connection?.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                self?.handlePathUpdate(path)
+            }
+        }
+
+        connection?.viabilityUpdateHandler = { [weak self] isViable in
+            DispatchQueue.main.async {
+                self?.log("Connection viability changed: \(isViable ? "viable" : "not viable")")
+            }
+        }
+
+        connection?.betterPathUpdateHandler = { [weak self] betterPathAvailable in
+            DispatchQueue.main.async {
+                self?.log("Better path available: \(betterPathAvailable)")
+            }
+        }
+
+        connection?.start(queue: .global(qos: .userInitiated))
+    }
+
+    func disconnect() {
+        stopKeepAlive()
+        connection?.cancel()
+        connection = nil
+        state = .disconnected
+        log("Disconnected")
+    }
+
+    private func handlePathUpdate(_ path: NWPath) {
+        var pathInfo = "Path update: status=\(path.status)"
+        if let interface = path.availableInterfaces.first {
+            pathInfo += ", interface=\(interface.name) (\(interface.type))"
+        }
+        pathInfo += ", expensive=\(path.isExpensive), constrained=\(path.isConstrained)"
+        log(pathInfo)
+    }
+
+    private func handleConnectionStateChange(_ newState: NWConnection.State) {
+        switch newState {
+            case .ready:
+                state = .connected
+                log("Connection established")
+                if let path = connection?.currentPath {
+                    handlePathUpdate(path)
+                }
+                startKeepAlive()
+
+            case .waiting(let error):
+                log("Waiting: \(error.localizedDescription)", isError: true)
+
+            case .failed(let error):
+                state = .failed(error.localizedDescription)
+                log("Connection failed: \(error.localizedDescription)", isError: true)
+                stopKeepAlive()
+
+            case .cancelled:
+                state = .disconnected
+                stopKeepAlive()
+
+            case .preparing:
+                log("Preparing connection…")
+
+            case .setup:
+                break
+
+            @unknown default:
+                break
+        }
+    }
+
+    private func startKeepAlive() {
+        sendHTTPRequest()
+
+        keepAliveTimer = Timer.scheduledTimer(withTimeInterval: keepAliveInterval, repeats: true) { [weak self] _ in
+            self?.sendHTTPRequest()
+        }
+    }
+
+    private func stopKeepAlive() {
+        keepAliveTimer?.invalidate()
+        keepAliveTimer = nil
+    }
+
+    private func sendHTTPRequest() {
+        guard case .connected = state, let connection = connection else { return }
+
+        let request = "GET / HTTP/1.1\r\nHost: \(targetHost)\r\nConnection: keep-alive\r\n\r\n"
+        let requestData = Data(request.utf8)
+
+        requestCount += 1
+        let currentRequest = requestCount
+        log("Sending request #\(currentRequest)")
+
+        connection.send(content: requestData, completion: .contentProcessed { [weak self] error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self?.log("Send error: \(error.localizedDescription)", isError: true)
+                }
+                return
+            }
+
+            self?.receiveResponse(requestNumber: currentRequest)
+        })
+    }
+
+    private func receiveResponse(requestNumber: Int) {
+        connection?.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.log("Receive error: \(error.localizedDescription)", isError: true)
+                    return
+                }
+
+                if let data = data {
+                    self?.lastResponseTime = Date()
+                    self?.lastResponseSize = data.count
+                    self?.log("Response #\(requestNumber): \(data.count) bytes")
+                }
+
+                if isComplete {
+                    self?.log("Connection closed by server")
+                    self?.state = .disconnected
+                    self?.stopKeepAlive()
+                }
+            }
+        }
+    }
+
+    private func log(_ message: String, isError: Bool = false) {
+        let logEntry = ConnectionLog(timestamp: Date(), message: message, isError: isError)
+        logs.insert(logEntry, at: 0)
+
+        if logs.count > 100 {
+            logs = Array(logs.prefix(100))
+        }
+
+        let timestamp = ISO8601DateFormatter().string(from: logEntry.timestamp)
+        print("DEBUG: [\(timestamp)] \(isError ? "ERROR: " : "")\(message)")
+    }
+
+    func clearLogs() {
+        logs.removeAll()
+    }
+}
