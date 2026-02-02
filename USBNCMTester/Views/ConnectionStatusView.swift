@@ -91,9 +91,9 @@ struct ConnectionStatusView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.red)
-            } else if ethernetInterface != nil {
+            } else if let iface = ethernetInterface {
                 Button(action: {
-                    connectionManager.connect(usingInterface: ethernetInterface?.name)
+                    connectionManager.connect(usingInterface: iface.name, interfaceIP: iface.ipAddress)
                 }) {
                     Label("Connect", systemImage: "play.circle")
                 }

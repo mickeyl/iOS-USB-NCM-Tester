@@ -18,6 +18,7 @@
 		A10000010000000000000011 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000011 /* LocationManager.swift */; };
 		A10000010000000000000012 /* ConnectionActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000012 /* ConnectionActivityAttributes.swift */; };
 		A10000010000000000000013 /* ActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000013 /* ActivityManager.swift */; };
+		A10000010000000000000014 /* Pinger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000014 /* Pinger.swift */; };
 		A20000010000000000000001 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000020000000000000001 /* WidgetKit.framework */; };
 		A20000010000000000000002 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A20000020000000000000002 /* SwiftUI.framework */; };
 		A20000010000000000000003 /* USBNCMTesterWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000003 /* USBNCMTesterWidgetBundle.swift */; };
@@ -63,6 +64,7 @@
 		A10000020000000000000011 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		A10000020000000000000012 /* ConnectionActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionActivityAttributes.swift; sourceTree = "<group>"; };
 		A10000020000000000000013 /* ActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityManager.swift; sourceTree = "<group>"; };
+		A10000020000000000000014 /* Pinger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pinger.swift; sourceTree = "<group>"; };
 		A10000030000000000000001 /* USBNCMTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = USBNCMTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000020000000000000001 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		A20000020000000000000002 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -149,6 +151,7 @@
 				A10000020000000000000006 /* ConnectionManager.swift */,
 				A10000020000000000000011 /* LocationManager.swift */,
 				A10000020000000000000013 /* ActivityManager.swift */,
+				A10000020000000000000014 /* Pinger.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				A10000010000000000000011 /* LocationManager.swift in Sources */,
 				A10000010000000000000012 /* ConnectionActivityAttributes.swift in Sources */,
 				A10000010000000000000013 /* ActivityManager.swift in Sources */,
+				A10000010000000000000014 /* Pinger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

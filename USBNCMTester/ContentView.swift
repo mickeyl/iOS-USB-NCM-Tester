@@ -10,6 +10,8 @@ struct ContentView: View {
 
     @AppStorage("autoConnectEnabled") private var autoConnectEnabled = true
     @AppStorage("soundEnabled") private var soundEnabled = true
+    @AppStorage("operationMode") private var operationMode: String = ConnectionManager.OperationMode.pingGateway.rawValue
+    @AppStorage("customPingTarget") private var customPingTarget: String = ""
     @State private var showingSettings = false
 
     var body: some View {
@@ -42,13 +44,18 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsSheet(autoConnectEnabled: $autoConnectEnabled, soundEnabled: $soundEnabled)
-                    .presentationDetents([.medium])
+                SettingsSheet(
+                    autoConnectEnabled: $autoConnectEnabled,
+                    soundEnabled: $soundEnabled,
+                    operationMode: $operationMode,
+                    customPingTarget: $customPingTarget
+                )
+                .presentationDetents([.medium, .large])
             }
             .onAppear {
                 scanner.startScanning()
                 locationManager.requestAuthorization()
-                connectionManager.soundEnabled = soundEnabled
+                syncSettingsToManager()
             }
             .onDisappear {
                 scanner.stopScanning()
@@ -67,10 +74,22 @@ struct ContentView: View {
             .onChange(of: connectionManager.requestCount) { _, _ in
                 updateLiveActivity()
             }
-            .onChange(of: soundEnabled) { _, newValue in
-                connectionManager.soundEnabled = newValue
+            .onChange(of: soundEnabled) { _, _ in
+                syncSettingsToManager()
+            }
+            .onChange(of: operationMode) { _, _ in
+                syncSettingsToManager()
+            }
+            .onChange(of: customPingTarget) { _, _ in
+                syncSettingsToManager()
             }
         }
+    }
+
+    private func syncSettingsToManager() {
+        connectionManager.soundEnabled = soundEnabled
+        connectionManager.operationMode = ConnectionManager.OperationMode(rawValue: operationMode) ?? .pingGateway
+        connectionManager.customPingTarget = customPingTarget
     }
 
     private func handleScenePhaseChange(_ phase: ScenePhase) {
@@ -97,7 +116,7 @@ struct ContentView: View {
 
         if let interface = interface {
             if case .disconnected = connectionManager.state {
-                connectionManager.connect(usingInterface: interface.name)
+                connectionManager.connect(usingInterface: interface.name, interfaceIP: interface.ipAddress)
             }
         }
     }
@@ -122,7 +141,13 @@ struct ContentView: View {
 struct SettingsSheet: View {
     @Binding var autoConnectEnabled: Bool
     @Binding var soundEnabled: Bool
+    @Binding var operationMode: String
+    @Binding var customPingTarget: String
     @Environment(\.dismiss) private var dismiss
+
+    private var selectedMode: ConnectionManager.OperationMode {
+        ConnectionManager.OperationMode(rawValue: operationMode) ?? .pingGateway
+    }
 
     var body: some View {
         NavigationStack {
@@ -132,7 +157,38 @@ struct SettingsSheet: View {
                         Label("Auto-connect", systemImage: "bolt.horizontal")
                     }
                 } footer: {
-                    Text("Automatically connect to www.google.de when an Ethernet interface is detected.")
+                    Text("Automatically connect when an Ethernet interface is detected.")
+                }
+
+                Section {
+                    Picker(selection: $operationMode) {
+                        ForEach(ConnectionManager.OperationMode.allCases) { mode in
+                            Text(mode.rawValue).tag(mode.rawValue)
+                        }
+                    } label: {
+                        Label("Mode", systemImage: "arrow.triangle.2.circlepath")
+                    }
+
+                    if selectedMode == .pingCustom {
+                        HStack {
+                            Label("Target IP", systemImage: "network")
+                            Spacer()
+                            TextField("IP Address", text: $customPingTarget)
+                                .textFieldStyle(.roundedBorder)
+                                .keyboardType(.decimalPad)
+                                .frame(width: 140)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                } footer: {
+                    switch selectedMode {
+                        case .pingGateway:
+                            Text("Ping the USB-NCM gateway at 192.168.42.42.")
+                        case .pingCustom:
+                            Text("Ping a custom IP address.")
+                        case .httpGoogle:
+                            Text("Send HTTP keep-alive requests to www.google.de.")
+                    }
                 }
 
                 Section {

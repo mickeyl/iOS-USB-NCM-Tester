@@ -24,6 +24,14 @@ final class ConnectionManager: ObservableObject {
         }
     }
 
+    enum OperationMode: String, CaseIterable, Identifiable {
+        case pingGateway = "Ping Gateway"
+        case pingCustom = "Ping Custom IP"
+        case httpGoogle = "HTTP (Google)"
+
+        var id: String { rawValue }
+    }
+
     struct ConnectionLog: Identifiable {
         let id = UUID()
         let timestamp: Date
@@ -37,28 +45,121 @@ final class ConnectionManager: ObservableObject {
     @Published private(set) var lastResponseTime: Date?
     @Published private(set) var lastResponseSize: Int = 0
     @Published var soundEnabled: Bool = true
+    @Published var operationMode: OperationMode = .pingGateway
+    @Published var customPingTarget: String = ""
 
     private var connection: NWConnection?
     private var keepAliveTimer: Timer?
-    private let targetHost: String
-    private let targetPort: UInt16
-    private let keepAliveInterval: TimeInterval
+    private var pingTask: Task<Void, Never>?
+    private var currentInterfaceIP: String?
+    private let keepAliveInterval: TimeInterval = 5.0
 
-    init(
-        targetHost: String = "www.google.de",
-        targetPort: UInt16 = 80,
-        keepAliveInterval: TimeInterval = 5.0
-    ) {
-        self.targetHost = targetHost
-        self.targetPort = targetPort
-        self.keepAliveInterval = keepAliveInterval
+    func connect(usingInterface interfaceName: String? = nil, interfaceIP: String? = nil) {
+        disconnect()
+        currentInterfaceIP = interfaceIP
+
+        switch operationMode {
+            case .pingGateway:
+                startPingMode(gateway: true)
+            case .pingCustom:
+                startPingMode(gateway: false)
+            case .httpGoogle:
+                startHTTPMode(interfaceName: interfaceName)
+        }
     }
 
-    func connect(usingInterface interfaceName: String? = nil) {
-        disconnect()
+    func disconnect() {
+        stopKeepAlive()
+        pingTask?.cancel()
+        pingTask = nil
+        connection?.cancel()
+        connection = nil
+        state = .disconnected
+        log("Disconnected")
+    }
+
+    // MARK: - Ping Mode
+
+    private func startPingMode(gateway: Bool) {
+        let target: String
+        if gateway {
+            guard let gatewayIP = deriveGatewayIP() else {
+                state = .failed("Cannot determine gateway")
+                log("Cannot determine gateway IP from interface", isError: true)
+                return
+            }
+            target = gatewayIP
+            log("Pinging gateway: \(target)")
+        } else {
+            guard !customPingTarget.isEmpty else {
+                state = .failed("No target specified")
+                log("No custom ping target specified", isError: true)
+                return
+            }
+            target = customPingTarget
+            log("Pinging custom target: \(target)")
+        }
 
         state = .connecting
-        log("Initiating connection to \(targetHost):\(targetPort)")
+
+        pingTask = Task { @MainActor in
+            let result = await Pinger.shared.ping(host: target, timeout: 2.0)
+            handlePingResult(result)
+
+            guard !Task.isCancelled else { return }
+            state = .connected
+
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: UInt64(keepAliveInterval * 1_000_000_000))
+                guard !Task.isCancelled else { break }
+
+                requestCount += 1
+                let currentRequest = requestCount
+                log("Ping #\(currentRequest) to \(target)")
+
+                let result = await Pinger.shared.ping(host: target, timeout: 2.0)
+                handlePingResult(result, requestNumber: currentRequest)
+            }
+        }
+    }
+
+    private func handlePingResult(_ result: Pinger.PingEvent, requestNumber: Int? = nil) {
+        switch result {
+            case .pong(let seq, let timeInMs):
+                lastResponseTime = Date()
+                let msg = requestNumber != nil
+                    ? "Pong #\(requestNumber!): \(String(format: "%.1f", timeInMs)) ms"
+                    : "Pong (seq=\(seq)): \(String(format: "%.1f", timeInMs)) ms"
+                log(msg)
+                if soundEnabled {
+                    AudioServicesPlaySystemSound(1057)
+                }
+
+            case .timeout(let seq):
+                let msg = requestNumber != nil
+                    ? "Timeout #\(requestNumber!)"
+                    : "Timeout (seq=\(seq))"
+                log(msg, isError: true)
+
+            case .error(let error):
+                log("Ping error: \(error)", isError: true)
+                state = .failed(error)
+        }
+    }
+
+    private func deriveGatewayIP() -> String? {
+        guard currentInterfaceIP != nil else { return nil }
+        return "192.168.42.42"
+    }
+
+    // MARK: - HTTP Mode
+
+    private func startHTTPMode(interfaceName: String?) {
+        let targetHost = "www.google.de"
+        let targetPort: UInt16 = 80
+
+        state = .connecting
+        log("Initiating HTTP connection to \(targetHost):\(targetPort)")
 
         let host = NWEndpoint.Host(targetHost)
         let port = NWEndpoint.Port(rawValue: targetPort)!
@@ -99,14 +200,6 @@ final class ConnectionManager: ObservableObject {
         }
 
         connection?.start(queue: .global(qos: .userInitiated))
-    }
-
-    func disconnect() {
-        stopKeepAlive()
-        connection?.cancel()
-        connection = nil
-        state = .disconnected
-        log("Disconnected")
     }
 
     private func handlePathUpdate(_ path: NWPath) {
@@ -167,12 +260,13 @@ final class ConnectionManager: ObservableObject {
     private func sendHTTPRequest() {
         guard case .connected = state, let connection = connection else { return }
 
+        let targetHost = "www.google.de"
         let request = "GET / HTTP/1.1\r\nHost: \(targetHost)\r\nConnection: keep-alive\r\n\r\n"
         let requestData = Data(request.utf8)
 
         requestCount += 1
         let currentRequest = requestCount
-        log("Sending request #\(currentRequest)")
+        log("Sending HTTP request #\(currentRequest)")
 
         connection.send(content: requestData, completion: .contentProcessed { [weak self] error in
             if let error = error {
@@ -197,7 +291,7 @@ final class ConnectionManager: ObservableObject {
                 if let data = data {
                     self?.lastResponseTime = Date()
                     self?.lastResponseSize = data.count
-                    self?.log("Response #\(requestNumber): \(data.count) bytes")
+                    self?.log("HTTP Response #\(requestNumber): \(data.count) bytes")
                     if self?.soundEnabled == true {
                         AudioServicesPlaySystemSound(1057)
                     }
@@ -211,6 +305,8 @@ final class ConnectionManager: ObservableObject {
             }
         }
     }
+
+    // MARK: - Logging
 
     private func log(_ message: String, isError: Bool = false) {
         let logEntry = ConnectionLog(timestamp: Date(), message: message, isError: isError)
